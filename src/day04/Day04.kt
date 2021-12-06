@@ -18,44 +18,51 @@ fun main() {
 
 }
 
-private fun calculatePart1(input: List<String>): Int {
-    val boards = input.drop(1).asBoards
-    val bingoNumbers = readNumbers(input.first(), delimiter = ",")
+private fun calculatePart1(input: List<String>): Int =
+    readNumbers(input.first(), delimiter = ",")
+        .let { bingoNumbers ->
+            for (i in 5..bingoNumbers.size) {
+                val currentBingoNumbers = bingoNumbers.take(i)
+                val bingoBoard: Board? = input.drop(1).asBoards.firstOrNull { it.bingo(currentBingoNumbers) }
 
-    for (i in 5..bingoNumbers.size) {
-        val currentBingoNumbers = bingoNumbers.take(i)
-        val bingoBoard: Board? = boards.firstOrNull { it.bingo(currentBingoNumbers) }
-
-        bingoBoard?.let {
-            return bingoBoard.unmarkedSum(currentBingoNumbers) * bingoNumbers[i - 1]
+                bingoBoard?.let {
+                    return bingoBoard.unmarkedSum(currentBingoNumbers) * bingoNumbers[i - 1]
+                }
+            }
+            return -1
         }
-    }
 
-    return -1
-}
+private fun calculatePart2(input: List<String>): Int =
+    readNumbers(input.first(), delimiter = ",")
+        .let { bingoNumbers ->
+            findLastBoardWithBingo(
+                boards = input.drop(1).asBoards,
+                bingoNumbers = bingoNumbers,
+                bingoIndex = 5
+            )
+                .let { (bingoIndex, lastBoards) ->
+                    lastBoards.first().unmarkedSum(bingoNumbers.take(bingoIndex)) * bingoNumbers[bingoIndex - 1]
+                }
+        }
 
-private fun calculatePart2(input: List<String>): Int {
-    val bingoNumbers = readNumbers(input.first(), delimiter = ",")
-    val (bingoIndex, lastBoards) = findLastBoardWithBingo(
-        boards = input.drop(1).asBoards,
-        bingoNumbers = bingoNumbers,
-        bingoIndex = 5
-    )
-    return lastBoards.first().unmarkedSum(bingoNumbers.take(bingoIndex)) * bingoNumbers[bingoIndex - 1]
-}
-
-private fun findLastBoardWithBingo(boards: List<Board>, bingoNumbers: List<Int>, bingoIndex: Int): Pair<Int, List<Board>> {
-    val bingoBoards: List<Board> = boards.filter { it.bingo(bingoNumbers.take(bingoIndex)) }
-    return if (bingoBoards.size == boards.size) {
-        bingoIndex to bingoBoards
-    } else {
-        findLastBoardWithBingo(
-            boards = boards.filter { !bingoBoards.contains(it) },
-            bingoNumbers = bingoNumbers,
-            bingoIndex = bingoIndex + 1
-        )
-    }
-}
+private fun findLastBoardWithBingo(
+    boards: List<Board>,
+    bingoNumbers: List<Int>,
+    bingoIndex: Int
+): Pair<Int, List<Board>> =
+    boards
+        .filter { it.bingo(bingoNumbers.take(bingoIndex)) }
+        .let { bingoBoards ->
+            if (bingoBoards.size == boards.size) {
+                bingoIndex to bingoBoards
+            } else {
+                findLastBoardWithBingo(
+                    boards = boards.filterNot { bingoBoards.contains(it) },
+                    bingoNumbers = bingoNumbers,
+                    bingoIndex = bingoIndex + 1
+                )
+            }
+        }
 
 private val List<String>.asBoards: List<Board>
     get() = filter { it.isNotEmpty() }
