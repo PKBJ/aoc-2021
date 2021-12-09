@@ -17,6 +17,10 @@ val String.asDecimal: Int
 
 val String.binaryInvert: String get() = map { if (it == '0') '1' else '0' }.joinToString(separator = "")
 
-val List<String>.asIntList get() = map { it.toInt() }
+val List<String>.asIntList get() = if (any { it.contains(",") }) {
+    flatMap { it.split(',') }.map { it.toInt() }
+} else {
+    map { it.toInt() }
+}
 
 val Char.bitFlip: Char get() = if (this == '1') '0' else '1'
