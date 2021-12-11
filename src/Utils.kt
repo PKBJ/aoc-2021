@@ -24,3 +24,5 @@ val List<String>.asIntList get() = if (any { it.contains(",") }) {
 }
 
 val Char.bitFlip: Char get() = if (this == '1') '0' else '1'
+
+val Char.toInt: Int get() = toString().toInt()
