@@ -2,7 +2,6 @@ package day09
 
 import readInput
 import toInt
-import kotlin.math.abs
 
 fun main() {
     fun part1(input: List<String>): Int = calculatePart1(input)
@@ -16,7 +15,7 @@ fun main() {
     println("=== Part 1 ===")
     println(part1(input))
     println("=== Part 2 ===")
-    // println(part2(input))
+    println(part2(input))
 
 }
 
@@ -28,10 +27,10 @@ private fun calculatePart1(input: List<String>): Int {
         (0 until grid.first().size).forEach { x ->
             grid[y][x].let { point ->
                 if (
-                        (grid.getOrNull(y)?.getOrNull(x - 1) ?: 9999) > point &&
-                        (grid.getOrNull(y)?.getOrNull(x + 1) ?: 9999) > point &&
-                        (grid.getOrNull(y - 1)?.getOrNull(x) ?: 9999) > point &&
-                        (grid.getOrNull(y + 1)?.getOrNull(x) ?: 9999) > point
+                    (grid.getOrNull(y)?.getOrNull(x - 1) ?: 9999) > point &&
+                    (grid.getOrNull(y)?.getOrNull(x + 1) ?: 9999) > point &&
+                    (grid.getOrNull(y - 1)?.getOrNull(x) ?: 9999) > point &&
+                    (grid.getOrNull(y + 1)?.getOrNull(x) ?: 9999) > point
                 ) {
                     points.add(point)
                 }
@@ -44,23 +43,19 @@ private fun calculatePart1(input: List<String>): Int {
 
 
 private fun calculatePart2(input: List<String>): Int {
-    val points = input.asPoints
-
+    val pointGrid = input.asPoints
     val basins = mutableListOf<List<Point>>()
 
-    points.forEach { point ->
-        if (point !in basins.flatten()) {
-            val basin = point.getBasin(points)
-            //println("Basin for $point: $basin" )
-            if (basin.isNotEmpty() && basin.none { it in basins.flatten() }) {
-                basins.add(basin)
+    pointGrid.forEach { row ->
+        row.forEach { point ->
+            if (point !in basins.flatten()) {
+                val basin = point.getBasin(pointGrid)
+                //println("Basin for $point: $basin" )
+                if (basin.isNotEmpty() && basin.none { it in basins.flatten() }) {
+                    basins.add(basin)
+                }
             }
         }
-    }
-
-    basins.forEach {
-        println(it)
-        println(it.size)
     }
 
     basins.sortByDescending { it.size }
@@ -68,14 +63,35 @@ private fun calculatePart2(input: List<String>): Int {
 }
 
 private data class Point(val value: Int, val x: Int, val y: Int) {
-    fun getBasin(grid: List<Point>): List<Point> =
-            grid.mapNotNull { point ->
-                if ((abs(point.x - x) + abs(point.y - y)) == abs(point.value - value)) {
-                    point
-                } else {
-                    null
-                }
-            }.filter { it.value != 9 }
+    private val basin = mutableListOf<Point>()
+
+    fun getBasin(grid: List<List<Point>>): List<Point> = traverse(this, grid).let { basin }
+
+    private fun traverse(point: Point, grid: List<List<Point>>) {
+        if (point.value >= 9) {
+            return
+        }
+
+        basin.add(point)
+
+        val right = grid.getOrNull(point.y)?.getOrNull(point.x + 1)
+        val left = grid.getOrNull(point.y)?.getOrNull(point.x - 1)
+        val up = grid.getOrNull(point.y - 1)?.getOrNull(point.x)
+        val down = grid.getOrNull(point.y + 1)?.getOrNull(point.x)
+
+        if (right != null && !basin.contains(right) && right.value < 9) {
+            traverse(right, grid)
+        }
+        if (left != null && !basin.contains(left) && left.value < 9) {
+            traverse(left, grid)
+        }
+        if (up != null && !basin.contains(up) && up.value < 9) {
+            traverse(up, grid)
+        }
+        if (down != null && !basin.contains(down) && down.value < 9) {
+            traverse(down, grid)
+        }
+    }
 }
 
 private val List<String>.asGrid: List<List<Int>>
@@ -83,8 +99,8 @@ private val List<String>.asGrid: List<List<Int>>
         line.map { it.toInt }
     }
 
-private val List<String>.asPoints: List<Point>
+private val List<String>.asPoints: List<List<Point>>
     get() = mapIndexed { y, line ->
         line.mapIndexed { x, value -> Point(value = value.toInt, x = x, y = y) }
-    }.flatten()
+    }
 
