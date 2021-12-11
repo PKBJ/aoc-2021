@@ -27,8 +27,8 @@ private fun calculatePart2(input: List<String>): Int = input.asGrid.let { grid -
     var day = 0
     do {
         grid.progressOneStep()
-        day +=1
-    } while (!grid.all{ row -> row.all { it == 0 } })
+        day += 1
+    } while (!grid.all { row -> row.all { it == 0 } })
     return@let day
 }
 
