@@ -45,7 +45,6 @@ private fun MutableList<MutableList<Int>>.progressOneStep(): Int {
             }
         }
     }
-
     // Flash until stack is empty
     while (!shouldFlash.isEmpty()) {
         flashCount += 1
