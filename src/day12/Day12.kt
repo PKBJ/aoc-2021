@@ -47,11 +47,12 @@ private fun List<Cave>.canVisitCave(cave: Cave, canVisitOneSmallCaveTwice: Boole
         cave.isStart && !contains(cave) ||
                 cave.isEnd && !contains(cave) ||
                 !cave.isSmall ||
-                cave.isSmall && none { it.name == cave.name }
+                none { it.name == cave.name }
         -> true
 
         canVisitOneSmallCaveTwice &&
-                cave.isSmall && !cave.isEnd && !cave.isStart -> {
+                !cave.isEnd &&
+                !cave.isStart -> {
             !filter { it.isSmall }
                 .groupBy { it.name }
                 .map { it.key to it.value.size }
