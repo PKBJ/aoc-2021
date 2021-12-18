@@ -1,5 +1,6 @@
 package day09
 
+import asGrid
 import readInput
 import toInt
 
@@ -93,11 +94,6 @@ private data class Point(val value: Int, val x: Int, val y: Int) {
         }
     }
 }
-
-private val List<String>.asGrid: List<List<Int>>
-    get() = map { line ->
-        line.map { it.toInt }
-    }
 
 private val List<String>.asPoints: List<List<Point>>
     get() = mapIndexed { y, line ->
